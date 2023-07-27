@@ -1,1 +1,23 @@
+name: Test AuthURL Connection
 
+# Controls when the workflow will run
+on:
+  
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  test-connection:
+    # Install Salesforce CLI
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Install SFDX"
+        run: |
+          npm install @salesforce/cli -g
+      - name: "Establish Salesforce connection"
+        run: |
+          echo "${{ secrets.SFDX_AUTH_URL }}" > sfdxAuthUrl.txt
+          sfdx auth:sfdxurl:store -f sfdxAuthUrl.txt -s
+          sf org login sfdx-url --sfdx-url-file sfdxAuthUrl.txt
+      - name: "Test Connection by querying Org Users"
+        run: sf data query --query "SELECT Id, Name, Username FROM User" --target-org MyOrg
